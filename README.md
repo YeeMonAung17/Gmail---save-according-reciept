@@ -2,6 +2,8 @@
 
 Turn routine inbox receipts into progress towards your dream goals.
 
+[View the three slide PowerPoint presentation](RecurrSave.pptx).
+
 A React frontend and NestJS backend for the hackathon idea described in [PRESENTATION.md](PRESENTATION.md). Gmail receipts, Engine Spaces, transfers and interest boosts are fully simulated. There are no Google or banking credentials, external email requests or real payments.
 
 ## Requirements
