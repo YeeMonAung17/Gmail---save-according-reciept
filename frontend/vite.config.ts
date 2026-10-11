@@ -6,7 +6,9 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 5173,
       strictPort: true,
-      proxy: { '/api': { target: env.API_PROXY_TARGET || 'http://localhost:3000' } },
+      proxy: {
+        '/api': { target: env.API_PROXY_TARGET || 'http://localhost:3000' },
+      },
     },
   };
 });

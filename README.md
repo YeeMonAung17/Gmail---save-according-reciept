@@ -24,6 +24,12 @@ cp backend/.env.example backend/.env
 
 The environment files contain local configuration only. Defaults work without copying them.
 
+The floating **Ask your guide** assistant uses a live OpenRouter API. Set `OPENROUTER_API_KEY` in `backend/.env` and restart the backend. Keep this key in the backend only; never put it in a frontend environment variable. The assistant uses `openrouter/free` with zero price caps and no paid fallback. Free model availability and usage limits depend on OpenRouter.
+
+The assistant explains the Gmail API + Engine Spaces concept, onboarding, savings rules, receipts and streaks. Use **Help me save** or **Suggest changes** for practical suggestions and the steps to review them. Suggestions cannot change budgets or move money.
+
+Chat messages and general app facts go to OpenRouter. **Share my budget summary** is off by default. When enabled, the backend supplies budget totals, goal amounts and deadline, current savings rules, streak and calculated alternatives from this session. Receipt emails, goal names and transaction descriptions are excluded. The assistant can then compare affordable rules using the same savings calculations as the app. Changing this choice clears the visible conversation; information already sent to OpenRouter cannot be recalled. Chat history stays in memory and clears on page reload. Provider errors leave the question available to retry. Do not include personal details or credentials in chat.
+
 ## Start the frontend
 
 In your first terminal, from the project root:
@@ -48,13 +54,14 @@ Both processes must be running. The frontend sends `/api` requests through Vite'
 
 ## Configuration
 
-| Location | Variable | Default | Purpose |
-| --- | --- | --- | --- |
-| `frontend/.env` | `API_PROXY_TARGET` | `http://localhost:3000` | Backend address used by the development proxy |
-| `backend/.env` | `PORT` | `3000` | Backend port |
-| `backend/.env` | `FRONTEND_ORIGIN` | `http://localhost:5173` | Allowed browser origin for API mutations |
-| `backend/.env` | `DATABASE_PATH` | `./data/recurrsave.sqlite` | SQLite location, relative to the backend workspace |
-| `backend/.env` | `DEMO_ENABLED` | `true` | Give new sessions a simulated calendar |
+| Location        | Variable             | Default                    | Purpose                                            |
+| --------------- | -------------------- | -------------------------- | -------------------------------------------------- |
+| `frontend/.env` | `API_PROXY_TARGET`   | `http://localhost:3000`    | Backend address used by the development proxy      |
+| `backend/.env`  | `PORT`               | `3000`                     | Backend port                                       |
+| `backend/.env`  | `FRONTEND_ORIGIN`    | `http://localhost:5173`    | Allowed browser origin for API mutations           |
+| `backend/.env`  | `DATABASE_PATH`      | `./data/recurrsave.sqlite` | SQLite location, relative to the backend workspace |
+| `backend/.env`  | `DEMO_ENABLED`       | `true`                     | Give new sessions a simulated calendar             |
+| `backend/.env`  | `OPENROUTER_API_KEY` | unset                      | Backend credential for the optional chat assistant |
 
 Do not put server secrets in the frontend. Configuration prefixed with `VITE_` would be exposed to the browser; this app does not need any such values.
 
@@ -62,13 +69,15 @@ SQLite is initialised automatically. No database server, ORM or manual migration
 
 Each browser receives an anonymous session cookie. Financial records are isolated by session and persist after restarting the backend. Display preferences are saved separately in browser local storage. To try a new demo without changing existing data, use a private browser window.
 
+**Reset**, next to Accessibility, deletes the current session and its saved setup, rules, spending, receipts and streak records from the backend, then returns to the first setup page. It also clears the visible assistant conversation. Other users' sessions and your accessibility preferences remain intact. If deletion fails, the app keeps the current page open and shows an error so you can retry.
+
 ## Demo walkthrough
 
 1. Open the frontend and choose **Try an example budget**, or enter your own monthly take home pay and essentials.
 2. Allocate an emergency amount or percentage, choose your goal and deadline, and review the summary.
 3. Choose the PlayStation savings rule and complete setup. The example produces £1,500 monthly discretionary income and a £346.15 weekly allowance.
-4. On the dashboard, simulate a PlayStation receipt. £49.99 rounded up to £50 saves £0.01 into the active goal Space.
-5. Simulate Gym and Adobe receipts. The initial rules save £3.20 and £0.01 respectively, provided the budget permits the transfers.
+4. On the dashboard, receive a PlayStation receipt, review its savings rule and confirm the saving. £49.49 rounded up to £50 saves £0.51 into the active goal Space. Receiving and reviewing alone do not change balances.
+5. Receive, review and confirm Gym and Adobe receipts. The initial rules save £3.20 and £0.51 respectively, provided the budget permits the transfers.
 6. Choose **Replay last receipt**. The backend recognises the message identifier and creates no second purchase or saving.
 7. Change a savings rule. If a purchase was already included in your monthly essentials, explicitly mark it as such to avoid counting its purchase amount twice.
 8. Record discretionary spending that is not represented by a receipt. Both spending and savings reduce the available budget.
@@ -139,18 +148,19 @@ Controllers accept HTTP requests. Services implement the use cases. Domain funct
 
 ## Backend API
 
-| Method | Endpoint | Purpose |
-| --- | --- | --- |
-| GET | `/api/health` | Check actual backend and storage availability |
-| GET | `/api/dashboard` | Retrieve budgets, goal, rules, receipts, ledger and streak |
-| GET | `/api/onboarding` | Retrieve saved setup and calendar date |
-| PUT | `/api/onboarding` | Validate and save a completed step or final plan |
-| GET | `/api/rules` | Retrieve merchant rules |
-| PUT | `/api/rules` | Save exactly one rule per demo merchant |
-| POST | `/api/receipts/simulate` | Process a fixture with a unique message identifier |
-| POST | `/api/spending` | Record spending using an idempotent request identifier |
-| POST | `/api/days/close` | Confirm and evaluate the day |
-| POST | `/api/demo/advance-day` | Advance this session's demo date |
+| Method | Endpoint                 | Purpose                                                    |
+| ------ | ------------------------ | ---------------------------------------------------------- |
+| GET    | `/api/health`            | Check actual backend and storage availability              |
+| GET    | `/api/dashboard`         | Retrieve budgets, goal, rules, receipts, ledger and streak |
+| GET    | `/api/onboarding`        | Retrieve saved setup and calendar date                     |
+| PUT    | `/api/onboarding`        | Validate and save a completed step or final plan           |
+| GET    | `/api/rules`             | Retrieve merchant rules                                    |
+| PUT    | `/api/rules`             | Save exactly one rule per demo merchant                    |
+| POST   | `/api/receipts/simulate` | Process a fixture with a unique message identifier         |
+| POST   | `/api/spending`          | Record spending using an idempotent request identifier     |
+| POST   | `/api/days/close`        | Confirm and evaluate the day                               |
+| POST   | `/api/demo/advance-day`  | Advance this session's demo date                           |
+| POST   | `/api/assistant`         | Ask the floating assistant using a free OpenRouter model   |
 
 Except for health, the endpoints use the session cookie. Mutations require JSON and an `Origin` header matching `FRONTEND_ORIGIN`. Requests above 16 KB are rejected. Unknown DTO fields are rejected, and financial responses use `Cache-Control: no-store`.
 
@@ -182,11 +192,14 @@ Amounts in requests are decimal strings; amounts in API budget and ledger respon
 From the root:
 
 ```sh
+npm run format:check
 npm run typecheck
 npm test
 npm run build
 npm audit
 ```
+
+Run `npm run format` to format the project with Prettier. Code uses two spaces for indentation and single quotes in JavaScript and TypeScript. Generated output, the dependency lockfile and binary assets are excluded.
 
 Tests use Node.js's built in runner. Backend tests start a real NestJS HTTP server with an isolated SQLite database. They cover validation, sessions, duplicate processing, skipped transfers, budget calculations, rollback and streak boundaries. Frontend tests cover form rules and API error handling.
 
@@ -237,19 +250,19 @@ The requested stack uses React, Vite, NestJS and TypeScript. Required supporting
 
 Registry review of the pinned versions:
 
-| Package | Version | Release | Approximate unpacked size | Licence |
-| --- | --- | --- | --- | --- |
-| React | 19.3.0 | 9 September 2026 | 179 KB | MIT |
-| React DOM | 19.3.0 | 9 September 2026 | 8,064 KB | MIT |
-| Vite | 8.3.4 | 8 October 2026 | 2,377 KB | MIT |
-| NestJS core | 12.1.2 | 30 September 2026 | 681 KB | MIT |
-| NestJS common | 12.1.2 | 30 September 2026 | 543 KB | MIT |
-| NestJS Express adapter | 12.1.2 | 30 September 2026 | 68 KB | MIT |
-| class-validator | 0.15.1 | 26 February 2026 | 5,327 KB | MIT |
-| class-transformer | 0.5.1 | 22 November 2021 | 776 KB | MIT |
-| reflect-metadata | 0.2.2 | 29 March 2024 | 241 KB | Apache-2.0 |
-| RxJS | 7.8.2 | 22 February 2025 | 4,498 KB | Apache-2.0 |
-| TypeScript | 5.9.3 | 30 September 2025 | 23,625 KB | Apache-2.0 |
+| Package                | Version | Release           | Approximate unpacked size | Licence    |
+| ---------------------- | ------- | ----------------- | ------------------------- | ---------- |
+| React                  | 19.3.0  | 9 September 2026  | 179 KB                    | MIT        |
+| React DOM              | 19.3.0  | 9 September 2026  | 8,064 KB                  | MIT        |
+| Vite                   | 8.3.4   | 8 October 2026    | 2,377 KB                  | MIT        |
+| NestJS core            | 12.1.2  | 30 September 2026 | 681 KB                    | MIT        |
+| NestJS common          | 12.1.2  | 30 September 2026 | 543 KB                    | MIT        |
+| NestJS Express adapter | 12.1.2  | 30 September 2026 | 68 KB                     | MIT        |
+| class-validator        | 0.15.1  | 26 February 2026  | 5,327 KB                  | MIT        |
+| class-transformer      | 0.5.1   | 22 November 2021  | 776 KB                    | MIT        |
+| reflect-metadata       | 0.2.2   | 29 March 2024     | 241 KB                    | Apache-2.0 |
+| RxJS                   | 7.8.2   | 22 February 2025  | 4,498 KB                  | Apache-2.0 |
+| TypeScript             | 5.9.3   | 30 September 2025 | 23,625 KB                 | Apache-2.0 |
 
 These are package installation sizes, not browser bundle sizes. The older supporting libraries are still required by the chosen NestJS validation and reflection approach. Registry usage signals range from roughly 11 million to 305 million weekly downloads across these packages. TypeScript declarations are bundled except for React, which uses its corresponding `@types` packages. Vite's build toolchain includes platform specific binaries; Node.js provides SQLite without an additional native package.
 

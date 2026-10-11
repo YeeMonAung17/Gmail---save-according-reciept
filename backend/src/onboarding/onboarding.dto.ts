@@ -1,4 +1,12 @@
-import { IsBoolean, IsIn, IsInt, IsString, Max, MaxLength, Min } from 'class-validator';
+import {
+  IsBoolean,
+  IsIn,
+  IsInt,
+  IsString,
+  Max,
+  MaxLength,
+  Min,
+} from 'class-validator';
 import { GoalKind } from '../domain/models';
 
 export class OnboardingDto {
@@ -13,7 +21,8 @@ export class OnboardingDto {
   @IsString() @MaxLength(60) goalName!: string;
   @IsString() @MaxLength(20) target!: string;
   @IsString() @MaxLength(10) targetDate!: string;
-  @IsIn(['round5', 'round10', 'percentage']) initialRule!: 'round5' | 'round10' | 'percentage';
+  @IsIn(['round5', 'round10', 'percentage']) initialRule!:
+    'round5' | 'round10' | 'percentage';
   @IsInt() @Min(1) @Max(5) step!: number;
   @IsBoolean() complete!: boolean;
 }

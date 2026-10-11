@@ -1,0 +1,8 @@
+node_modules/
+**/dist/
+**/.test-build/
+coverage/
+backend/data/
+package-lock.json
+assets/
+*.pptx

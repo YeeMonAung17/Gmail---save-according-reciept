@@ -1,6 +1,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { emptyPlan, previewBudget, toPennies, validateStep } from '../src/lib/forms.js';
+import {
+  emptyPlan,
+  previewBudget,
+  toPennies,
+  validateStep,
+} from '../src/lib/forms.js';
 import { money } from '../src/lib/format.js';
 
 test('GBP input and formatting preserve exact pennies', () => {
@@ -20,8 +25,26 @@ test('form validation only requires fields reached in onboarding', () => {
 });
 
 test('invalid financial allocations and calendar dates receive errors', () => {
-  const plan = { ...emptyPlan(), income: '2000', step: 3, target: '100', targetDate: '2026-02-30' };
-  assert.equal(validateStep(plan, '2026-01-01').targetDate, 'Choose a real future date.');
-  assert.equal(validateStep({ ...plan, emergencyMode: 'percentage', emergency: '101' }, '2026-01-01').emergency, 'Use a percentage from 0 to 100.');
-  assert.equal(validateStep({ ...plan, rent: '3000' }, '2026-01-01').income, 'Your essential expenses exceed your income.');
+  const plan = {
+    ...emptyPlan(),
+    income: '2000',
+    step: 3,
+    target: '100',
+    targetDate: '2026-02-30',
+  };
+  assert.equal(
+    validateStep(plan, '2026-01-01').targetDate,
+    'Choose a real future date.',
+  );
+  assert.equal(
+    validateStep(
+      { ...plan, emergencyMode: 'percentage', emergency: '101' },
+      '2026-01-01',
+    ).emergency,
+    'Use a percentage from 0 to 100.',
+  );
+  assert.equal(
+    validateStep({ ...plan, rent: '3000' }, '2026-01-01').income,
+    'Your essential expenses exceed your income.',
+  );
 });

@@ -16,6 +16,7 @@ The initial demo is implemented. The completion checklist records the verified f
 - Validate inputs in both the browser and backend.
 - Make accessibility a core requirement, with visible controls and explicit acceptance checks throughout onboarding and the dashboard.
 - Explain how to start the app and backend in `README.md`.
+- Provide a floating assistant throughout onboarding and the dashboard. Use the backend to call OpenRouter's free model router with an environment key and zero price caps. Explain the concept, suggest affordable savings habits and propose rule changes for the user to review. Budget sharing is optional and off by default: only a summary from the current session is sent when enabled, excluding receipt emails, goal names and transaction descriptions. Calculate candidate savings using the existing domain rules. Keep the key out of the browser and repository. Suggestions cannot change budgets or move money.
 
 ## Accessibility is a core feature
 
@@ -156,12 +157,12 @@ Acceptance: each displayed figure comes from the backend ledger, every action ha
 
 Example outcomes:
 
-| Receipt | Rule | Simulated savings |
-| --- | --- | --- |
-| PlayStation £49.99 | Round up to £10 | £0.01 |
-| Gym £32.00 | Match 10% | £3.20 |
-| Adobe £19.99 | Round up to £5 | £0.01 |
-| Additional £15.99 example | Round up to £10 | £4.01 |
+| Receipt                   | Rule            | Simulated savings |
+| ------------------------- | --------------- | ----------------- |
+| PlayStation £49.99        | Round up to £10 | £0.01             |
+| Gym £32.00                | Match 10%       | £3.20             |
+| Adobe £19.99              | Round up to £5  | £0.01             |
+| Additional £15.99 example | Round up to £10 | £4.01             |
 
 The initial version has one active goal selected during onboarding. These sample rules route to that goal; the different destination names in the pitch are examples rather than a requirement for multiple simultaneous goals.
 
@@ -185,18 +186,18 @@ Acceptance: test nine versus ten days, twenty consecutive days, duplicate evalua
 
 Proposed endpoint responsibilities:
 
-| Endpoint | Responsibility |
-| --- | --- |
-| `GET /api/dashboard` | Return the current plan, budgets, goal, ledger and streak |
-| `GET /api/onboarding` | Restore setup progress |
-| `PUT /api/onboarding` | Validate and save setup progress or complete the plan |
-| `GET /api/rules` | List the session's merchant rules |
-| `PUT /api/rules` | Validate and save rule settings |
+| Endpoint                      | Responsibility                                               |
+| ----------------------------- | ------------------------------------------------------------ |
+| `GET /api/dashboard`          | Return the current plan, budgets, goal, ledger and streak    |
+| `GET /api/onboarding`         | Restore setup progress                                       |
+| `PUT /api/onboarding`         | Validate and save setup progress or complete the plan        |
+| `GET /api/rules`              | List the session's merchant rules                            |
+| `PUT /api/rules`              | Validate and save rule settings                              |
 | `POST /api/receipts/simulate` | Submit a supported mocked receipt to the processing pipeline |
-| `POST /api/spending` | Record additional discretionary spending |
-| `POST /api/days/close` | Confirm and evaluate the completed day |
-| `POST /api/demo/advance-day` | Advance the explicitly enabled demo calendar |
-| `GET /api/health` | Return basic application and storage availability |
+| `POST /api/spending`          | Record additional discretionary spending                     |
+| `POST /api/days/close`        | Confirm and evaluate the completed day                       |
+| `POST /api/demo/advance-day`  | Advance the explicitly enabled demo calendar                 |
+| `GET /api/health`             | Return basic application and storage availability            |
 
 1. Implement endpoints as NestJS controllers backed by injectable services. Define request DTOs and validate bodies at runtime through a global validation pipe, independently of TypeScript. Reject unknown fields and invalid types instead of silently accepting them. Review the required validation packages before installation; follow the [NestJS validation documentation](https://docs.nestjs.com/techniques/validation).
 2. Use consistent JSON response shapes, meaningful HTTP status codes and readable validation errors.

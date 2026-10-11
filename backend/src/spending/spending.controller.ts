@@ -6,5 +6,7 @@ import { SpendingService } from './spending.service';
 @Controller('spending')
 export class SpendingController {
   constructor(private readonly service: SpendingService) {}
-  @Post() add(@Req() request: SessionRequest, @Body() input: SpendingDto) { return this.service.add(request.sessionId, input); }
+  @Post() add(@Req() request: SessionRequest, @Body() input: SpendingDto) {
+    return this.service.add(request.sessionId, input);
+  }
 }

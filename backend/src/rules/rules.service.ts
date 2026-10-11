@@ -7,10 +7,15 @@ import { DomainError } from '../domain/money';
 @Injectable()
 export class RulesService {
   constructor(private readonly database: DatabaseService) {}
-  get(id: string) { const state = this.database.read(id); requirePlan(state); return { rules: state.rules }; }
+  get(id: string) {
+    const state = this.database.read(id);
+    requirePlan(state);
+    return { rules: state.rules };
+  }
 
   save(id: string, rules: SavingsRule[]) {
-    if (new Set(rules.map((rule) => rule.merchant)).size !== 3) throw new DomainError('Provide one rule for each demo merchant.');
+    if (new Set(rules.map((rule) => rule.merchant)).size !== 3)
+      throw new DomainError('Provide one rule for each demo merchant.');
     return this.database.update(id, (state) => {
       requirePlan(state);
       state.rules = rules.map((rule) => ({ ...rule }));

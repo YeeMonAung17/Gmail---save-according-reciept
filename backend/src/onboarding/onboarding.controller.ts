@@ -6,6 +6,10 @@ import { OnboardingService } from './onboarding.service';
 @Controller('onboarding')
 export class OnboardingController {
   constructor(private readonly service: OnboardingService) {}
-  @Get() get(@Req() request: SessionRequest) { return this.service.get(request.sessionId); }
-  @Put() save(@Req() request: SessionRequest, @Body() input: OnboardingDto) { return this.service.save(request.sessionId, input); }
+  @Get() get(@Req() request: SessionRequest) {
+    return this.service.get(request.sessionId);
+  }
+  @Put() save(@Req() request: SessionRequest, @Body() input: OnboardingDto) {
+    return this.service.save(request.sessionId, input);
+  }
 }

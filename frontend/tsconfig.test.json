@@ -1,5 +1,11 @@
 {
   "extends": "./tsconfig.json",
-  "compilerOptions": { "noEmit": false, "outDir": ".test-build", "rootDir": ".", "module": "NodeNext", "moduleResolution": "NodeNext" },
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": ".test-build",
+    "rootDir": ".",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext"
+  },
   "include": ["tests", "src/lib", "src/api"]
 }

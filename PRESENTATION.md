@@ -2,13 +2,17 @@
 
 **Turn routine inbox receipts into progress towards your dream goals.**
 
+**The idea: Gmail API + Engine Spaces.** Gmail API provides purchase receipts; RecurrSave reads the amounts and applies the user's savings rules; Engine Spaces holds the resulting savings towards a personal goal.
+
+**Gmail API → purchase receipt → savings rule → Engine Spaces → goal progress.**
+
 RecurrSave helps people understand what they can afford to spend, plan an emergency cushion and save small amounts towards something they care about. A purchase receipt becomes a prompt to save, while a ten day budget streak rewards consistent habits.
 
-The hackathon app will use a mocked inbox and simulated Engine Spaces. It will demonstrate the complete journey without connecting to Gmail or moving real money.
+The product concept connects Gmail API to Engine Spaces. The current hackathon prototype uses a mocked inbox and simulated Engine Spaces to demonstrate that journey without connecting to Gmail or moving real money. Live API integrations are planned, not implemented.
 
 1. **Architecture**
 
-   Use React for the frontend and NestJS for the backend, with TypeScript in both. The React app presents the journey, while the NestJS API validates inputs, calculates budgets and processes mocked receipts. Use SQLite to remember the user's setup, receipts, savings and streak. Keep financial calculations and storage separate from the interface so the behaviour is easier to understand and verify.
+   Use React for the frontend and NestJS for the backend, with TypeScript in both. In the product concept, the backend connects Gmail API receipt intake to savings rules and Engine Spaces transfers. The current NestJS API validates inputs, calculates budgets and processes mocked receipts. Use SQLite to remember the user's setup, receipts, savings and streak. Keep financial calculations and storage separate from the interface so the behaviour is easier to understand and verify.
 
 2. **Five step onboarding**
 
@@ -20,7 +24,7 @@ The hackathon app will use a mocked inbox and simulated Engine Spaces. It will d
 
 4. **Receipt automation**
 
-   Use a clearly labelled inbox simulator with PlayStation, Gym and Adobe receipts. When a receipt arrives, the backend reads its amount, applies the chosen rule and records a simulated transfer into the user's goal Space. A £49.99 PlayStation receipt rounded up to £50 saves £0.01; a 10% match on a £32 gym receipt saves £3.20. Processing the same receipt again must not create another transfer.
+   In the planned integration, Gmail API supplies purchase receipts and Engine Spaces receives savings after the backend applies the chosen rule and checks the budget. Demonstrate this with a clearly labelled inbox simulator using PlayStation, Gym and Adobe receipts. Receive a receipt, review its savings rule, then confirm the purchase and simulated transfer into the user's goal Space. Receiving and reviewing alone do not change balances. A £49.49 PlayStation receipt rounded up to £50 saves £0.51; a 10% match on a £32 gym receipt saves £3.20. Processing the same receipt again must not create another transfer.
 
 5. **Financial safeguards**
 
@@ -38,4 +42,4 @@ The hackathon app will use a mocked inbox and simulated Engine Spaces. It will d
 
    Explain how to install the project, start the React frontend and NestJS backend in separate terminals, find local data and run checks. Include a short walkthrough: complete setup, simulate a receipt, watch the goal balance change and progress through a ten day streak. Clearly state that Gmail, transfers and interest rewards are simulated and require no banking or Google credentials.
 
-The value of RecurrSave is the connection between responsible budgeting, small repeatable savings and visible progress towards a personal goal. The demo will make that connection easy to follow and accessible to use.
+The value of RecurrSave is connecting Gmail API purchase receipts to Engine Spaces goal savings, guided by responsible budgeting and small repeatable savings. The demo will make that connection easy to follow and accessible to use.

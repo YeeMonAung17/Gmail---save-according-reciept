@@ -6,6 +6,10 @@ import { RulesService } from './rules.service';
 @Controller('rules')
 export class RulesController {
   constructor(private readonly service: RulesService) {}
-  @Get() get(@Req() request: SessionRequest) { return this.service.get(request.sessionId); }
-  @Put() save(@Req() request: SessionRequest, @Body() input: RulesDto) { return this.service.save(request.sessionId, input.rules); }
+  @Get() get(@Req() request: SessionRequest) {
+    return this.service.get(request.sessionId);
+  }
+  @Put() save(@Req() request: SessionRequest, @Body() input: RulesDto) {
+    return this.service.save(request.sessionId, input.rules);
+  }
 }

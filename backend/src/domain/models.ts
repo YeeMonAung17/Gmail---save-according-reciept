@@ -71,5 +71,8 @@ export interface SessionState {
 }
 
 export const goalNames: Record<GoalKind, string> = {
-  house: 'House deposit', car: 'New car', travel: 'Holiday / travel', custom: 'Custom goal',
+  house: 'House deposit',
+  car: 'New car',
+  travel: 'Holiday / travel',
+  custom: 'Custom goal',
 };
